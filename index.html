@@ -1,22 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Mini App</title>
-    
-    <!-- 1. CORRECT COMPLIANT SCRIPT URL -->
-    <script src="https://grootils.com" data-zone="11720925" async></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Reward App</title>
+
+  <!-- Telegram Mini App -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- Monetag SDK -->
+  <script
+    src="//libtl.com/sdk.js"
+    data-zone="11720925"
+    data-sdk="show_11720925">
+  </script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--tg-theme-bg-color, #111827);
+      color: var(--tg-theme-text-color, #ffffff);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+
+    .card {
+      background: var(--tg-theme-secondary-bg-color, #1f2937);
+      border-radius: 22px;
+      padding: 30px 22px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+
+    .logo {
+      font-size: 55px;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: 26px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      opacity: 0.7;
+      margin-bottom: 25px;
+    }
+
+    .balance {
+      font-size: 38px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+
+    .balance-label {
+      font-size: 13px;
+      opacity: 0.6;
+    }
+
+    button {
+      width: 100%;
+      border: none;
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+      background: var(--tg-theme-button-color, #2481cc);
+      color: var(--tg-theme-button-text-color, #ffffff);
+      transition: transform 0.15s, opacity 0.15s;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status {
+      min-height: 22px;
+      margin-top: 15px;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    .info {
+      margin-top: 20px;
+      font-size: 12px;
+      opacity: 0.5;
+      line-height: 1.5;
+    }
+  </style>
 </head>
-<body style="margin: 0; background-color: #17212b; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center;">
-    <div>
-        <h1>Welcome to My Mini App</h1>
-        <p style="color: #708499; margin-bottom: 25px;">Watch a short ad to continue.</p>
-        
-        <!-- 2. DIRECT AD CALL -->
-        <button onclick="if(typeof show_11720925 === 'function') { show_11720925({ type: 'pop' }); } else { alert('Ad network initializing... please tap again in 2 seconds.'); }" style="padding: 15px 30px; font-size: 18px; background-color: #0088cc; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
-            🚀 Show Ad
-        </button>
+
+<body>
+
+  <div class="app">
+    <div class="card">
+
+      <div class="logo">🎁</div>
+
+      <h1>Watch & Earn</h1>
+
+      <p class="subtitle">
+        Watch a sponsored ad to earn rewards.
+      </p>
+
+      <div class="balance-label">YOUR BALANCE</div>
+      <div class="balance">
+        <span id="balance">0</span> Points
+      </div>
+
+      <button id="adButton" onclick="watchAd()">
+        📺 Watch Ad & Earn
+      </button>
+
+      <div class="status" id="status"></div>
+
+      <div class="info">
+        Rewards are added after the ad finishes.
+      </div>
+
     </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+
+    tg.ready();
+    tg.expand();
+
+    let balance = Number(localStorage.getItem("balance")) || 0;
+
+    const balanceElement = document.getElementById("balance");
+    const button = document.getElementById("adButton");
+    const status = document.getElementById("status");
+
+    function updateBalance() {
+      balanceElement.textContent = balance;
+      localStorage.setItem("balance", balance);
+    }
+
+    async function watchAd() {
+
+      if (typeof show_11720925 !== "function") {
+        status.textContent = "Ad system is still loading. Try again.";
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "⏳ Loading Ad...";
+      status.textContent = "";
+
+      try {
+
+        await show_11720925("pop");
+
+        // Reward is given only after Monetag resolves.
+        balance += 1;
+        updateBalance();
+
+        status.textContent = "✅ Ad completed! +1 point";
+
+      } catch (error) {
+
+        console.error(error);
+        status.textContent = "❌ The ad could not be loaded.";
+
+      } finally {
+
+        button.disabled = false;
+        button.textContent = "📺 Watch Ad & Earn";
+
+      }
+    }
+
+    updateBalance();
+  </script>
+
 </body>
-</html>
+    </html>
