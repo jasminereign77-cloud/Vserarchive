@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Reward App</title>
+  <title>Access File</title>
 
   <!-- Telegram Mini App -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -19,182 +19,138 @@
   <style>
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
     }
 
     body {
-      font-family: Arial, sans-serif;
-      background: var(--tg-theme-bg-color, #111827);
-      color: var(--tg-theme-text-color, #ffffff);
+      margin: 0;
       min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       padding: 20px;
     }
 
-    .app {
+    .container {
       width: 100%;
       max-width: 420px;
-      text-align: center;
     }
 
     .card {
-      background: var(--tg-theme-secondary-bg-color, #1f2937);
-      border-radius: 22px;
+      background: #1d1d1d;
+      border-radius: 20px;
       padding: 30px 22px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
     }
 
-    .logo {
-      font-size: 55px;
-      margin-bottom: 10px;
+    .icon {
+      font-size: 58px;
+      margin-bottom: 12px;
     }
 
     h1 {
-      font-size: 26px;
-      margin-bottom: 8px;
+      margin: 0 0 10px;
+      font-size: 25px;
     }
 
-    .subtitle {
-      opacity: 0.7;
-      margin-bottom: 25px;
-    }
-
-    .balance {
-      font-size: 38px;
-      font-weight: bold;
-      margin: 20px 0;
-    }
-
-    .balance-label {
-      font-size: 13px;
-      opacity: 0.6;
+    p {
+      color: #aaa;
+      line-height: 1.5;
+      margin-bottom: 22px;
     }
 
     button {
       width: 100%;
       border: none;
-      border-radius: 14px;
+      border-radius: 13px;
       padding: 16px;
+      background: #2aabee;
+      color: #fff;
       font-size: 17px;
       font-weight: bold;
       cursor: pointer;
-      background: var(--tg-theme-button-color, #2481cc);
-      color: var(--tg-theme-button-text-color, #ffffff);
-      transition: transform 0.15s, opacity 0.15s;
-    }
-
-    button:active {
-      transform: scale(0.97);
     }
 
     button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+      opacity: .6;
+      cursor: wait;
     }
 
-    .status {
-      min-height: 22px;
-      margin-top: 15px;
+    #status {
+      margin-top: 16px;
+      min-height: 20px;
       font-size: 14px;
-      opacity: 0.8;
-    }
-
-    .info {
-      margin-top: 20px;
-      font-size: 12px;
-      opacity: 0.5;
-      line-height: 1.5;
+      color: #bbb;
     }
   </style>
 </head>
 
 <body>
 
-  <div class="app">
+  <div class="container">
     <div class="card">
 
-      <div class="logo">🎁</div>
+      <div class="icon">📂</div>
 
-      <h1>Watch & Earn</h1>
+      <h1>Access File</h1>
 
-      <p class="subtitle">
-        Watch a sponsored ad to earn rewards.
+      <p>
+        Watch the sponsored ads to access the file.
       </p>
 
-      <div class="balance-label">YOUR BALANCE</div>
-      <div class="balance">
-        <span id="balance">0</span> Points
-      </div>
-
-      <button id="adButton" onclick="watchAd()">
-        📺 Watch Ad & Earn
+      <button id="watchBtn" onclick="watchAd()">
+        📺 Watch Ads to Access File 📂
       </button>
 
-      <div class="status" id="status"></div>
-
-      <div class="info">
-        Rewards are added after the ad finishes.
-      </div>
+      <div id="status"></div>
 
     </div>
   </div>
 
   <script>
-    const tg = window.Telegram.WebApp;
-
-    tg.ready();
-    tg.expand();
-
-    let balance = Number(localStorage.getItem("balance")) || 0;
-
-    const balanceElement = document.getElementById("balance");
-    const button = document.getElementById("adButton");
-    const status = document.getElementById("status");
-
-    function updateBalance() {
-      balanceElement.textContent = balance;
-      localStorage.setItem("balance", balance);
+    // Initialize Telegram Mini App
+    if (window.Telegram && Telegram.WebApp) {
+      Telegram.WebApp.ready();
+      Telegram.WebApp.expand();
     }
 
+    const button = document.getElementById("watchBtn");
+    const status = document.getElementById("status");
+
+    const FILE_URL =
+      "https://mega.nz/folder/ew4kWaaL#JsKxDK4GNAhNkoGPcZoA4A";
+
     async function watchAd() {
-
-      if (typeof show_11720925 !== "function") {
-        status.textContent = "Ad system is still loading. Try again.";
-        return;
-      }
-
       button.disabled = true;
       button.textContent = "⏳ Loading Ad...";
       status.textContent = "";
 
       try {
+        if (typeof show_11720925 !== "function") {
+          throw new Error("Monetag SDK has not loaded.");
+        }
 
         await show_11720925("pop");
 
-        // Reward is given only after Monetag resolves.
-        balance += 1;
-        updateBalance();
+        status.textContent = "✅ Ad completed! Opening file 📂";
 
-        status.textContent = "✅ Ad completed! +1 point";
+        // Open the file after the ad promise resolves
+        window.location.href = FILE_URL;
 
       } catch (error) {
+        console.error("Monetag error:", error);
 
-        console.error(error);
-        status.textContent = "❌ The ad could not be loaded.";
-
-      } finally {
+        status.textContent =
+          "❌ The ad could not be loaded. Please try again.";
 
         button.disabled = false;
-        button.textContent = "📺 Watch Ad & Earn";
-
+        button.textContent = "📺 Watch Ads to Access File 📂";
       }
     }
-
-    updateBalance();
   </script>
 
 </body>
-    </html>
+</html>
